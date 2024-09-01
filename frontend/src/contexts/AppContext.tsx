@@ -1,6 +1,7 @@
 import { ReactNode, createContext, useContext, useState, Dispatch, SetStateAction  } from "react";
+import {type UserImageData } from "../types/appTypes.ts";
 
-type PromptContextType = {
+type AppContextType = {
   n_images: number;
   setNImages: Dispatch<SetStateAction<number>>;
   quality: string;
@@ -11,33 +12,25 @@ type PromptContextType = {
   setStyle: Dispatch<SetStateAction<string>>;
   prompt: string;
   setPrompt: Dispatch<SetStateAction<string>>;
+  userImagesList: UserImageData[];
+  setUserImagesList: Dispatch<SetStateAction<UserImageData[]>>;
 }
+
+const AppContext = createContext<AppContextType | undefined>(undefined);
 
 type PromptProviderProps = {
     children: ReactNode;
 }
 
-const promptContext = createContext<PromptContextType>({
-    n_images: 1,
-    setNImages: () => {},
-    quality: "standard",
-    setQuality: () => {},
-    size: "1024x1024",
-    setSize: () => {},
-    style: "natural",
-    setStyle: () => {},
-    prompt: "",
-    setPrompt: () => {},
-});
-
-export function PromptProvider({ children } : PromptProviderProps)  {
+export function AppProvider({ children } : PromptProviderProps)  {
     const [n_images, setNImages] = useState<number>(1);
     const [quality, setQuality] = useState<string>("standard");
     const [size, setSize] = useState<string>("1024x1024");
     const [style, setStyle] = useState<string>("natural");
     const [prompt, setPrompt] = useState<string>("");
+    const [userImagesList, setUserImagesList] = useState<UserImageData[]>([]);
 
-    const value: PromptContextType = {
+    const value: AppContextType = {
     n_images,
     setNImages,
     quality,
@@ -48,13 +41,15 @@ export function PromptProvider({ children } : PromptProviderProps)  {
     setStyle,
     prompt,
     setPrompt,
+    userImagesList,
+    setUserImagesList,
     };
 
-  return <promptContext.Provider value={value}>{children}</promptContext.Provider>
+  return <AppContext.Provider value={value}>{children}</AppContext.Provider>
 }
 
-export function usePrompt() {
-  const context = useContext(promptContext);
+export function useAppContext() {
+  const context = useContext(AppContext);
   if (context === undefined) {
     throw new Error('usePrompt has to be used inside a PromptProvider');
   }

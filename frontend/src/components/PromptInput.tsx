@@ -1,4 +1,4 @@
-import {usePrompt} from "../../../contexts/PromptContext.tsx";
+import { useAppContext } from "../contexts/AppContext.tsx";
 
 const getApiBaseUrl = (): string => {
     const backendBaseURL = import.meta.env.VITE_API_BASE_URL;
@@ -13,10 +13,10 @@ const getApiBaseUrl = (): string => {
 };
 
 export default function PromptInput() {
-    const {prompt, setPrompt, n_images, quality, size, style} = usePrompt();
+    const {prompt, setPrompt, n_images, quality, size, style, setUserImagesArray} = useAppContext();
 
     const handleGenerateClick = async () => {
-        console.log('Generating data...');
+
         const queryParams = new URLSearchParams({
             prompt,
             n_images: n_images.toString(),
@@ -25,11 +25,9 @@ export default function PromptInput() {
             style,
         });
 
-        const apiUrl = `${getApiBaseUrl()}/api/generate?${queryParams.toString()}`;
-        console.log('API URL:', apiUrl);
-
+        const apiUrl = `${getApiBaseUrl()}/api/images/generate?${queryParams.toString()}`;
         fetch(apiUrl, {
-            method: 'GET',
+            method: 'POST',
         })
             .then(response => {
                 if (!response.ok) {
@@ -38,7 +36,7 @@ export default function PromptInput() {
                 return response.json();
             })
             .then(data => {
-                console.log('Generated data:', data);
+                setUserImagesArray(prevData => ({userImages: [...prevData.userImages, ...data]}));
             })
             .catch(error => {
                 console.error('Error fetching generated data:', error);

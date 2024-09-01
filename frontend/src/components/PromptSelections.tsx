@@ -1,8 +1,8 @@
-import {usePrompt} from "../../../contexts/PromptContext.tsx";
+import { useAppContext } from "../contexts/AppContext.tsx";
 
 
 export default function PromptSelections() {
-    const {n_images, setNImages, quality, setQuality, size, setSize, style, setStyle} = usePrompt()
+    const {n_images, setNImages, quality, setQuality, size, setSize, style, setStyle} = useAppContext()
 
     return (
         <div className="flex space-x-4 mb-4">

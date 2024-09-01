@@ -1,20 +1,21 @@
-import Header from "./Header.tsx";
-import PromptBoard from "./PromptBoard/PromptBoard.tsx";
-import {PromptProvider} from "../contexts/PromptContext.tsx";
+import Header from "./components/Header.tsx";
+
+import {AppProvider} from "./contexts/AppContext.tsx";
+import ImageGenerationPage from "./pages/ImageGeneration.tsx";
 
 
 function App() {
 
     return (
         <>
-            <PromptProvider>
+            <AppProvider>
                 <Header
                     logo={"https://parksandresorts.com/assets/themes/parksandresorts/resources/images/par_logo.svg"}
                     title={"AI Image Studio"}
                 ></Header>
 
-                <PromptBoard></PromptBoard>
-            </PromptProvider>
+                <ImageGenerationPage></ImageGenerationPage>
+            </AppProvider>
         </>
     )
 }
