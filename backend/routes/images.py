@@ -31,6 +31,12 @@ async def get_images(user_id: str):
 
     return JSONResponse(content=user_images)
 
+@router.get("/images/blob/{blob_name}")
+async def get_image_url(blob_name:str):
+    # Add SAS token to each image URL
+    image_url = blobstorage_service.generate_sas_url(blob_name)
+    return JSONResponse(content={"imageUrl": image_url})
+
 @router.post("/images/generate")
 async def generate_images(user_id: str,
                           prompt: str,
@@ -54,6 +60,7 @@ async def generate_images(user_id: str,
         # Save the generated images to Azure Blob Storage
         new_image_urls, blob_names = await blobstorage_service.process_images(user_id, data)
 
+        images_data = []
         # Upload to CosmosDB
         for i, image_data in enumerate(data):
             image_settings = {
@@ -68,8 +75,15 @@ async def generate_images(user_id: str,
                                                 blob_names[i],
                                                 image_settings
                                                 )
+            images_data.append({
+                "prompt": prompt,
+                "revised_prompt": image_data["revised_prompt"],
+                "imageUrl": new_image_urls[i],
+                "blobName": blob_names[i],
+                "imageSettings": image_settings
+            })
 
-        return {"Files uploaded successfully": new_image_urls}
+        return JSONResponse(content=images_data)
     except BadRequestError as e:
         return JSONResponse(content={"error": str(e)}, status_code=400)
     except Exception as e:

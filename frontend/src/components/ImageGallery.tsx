@@ -1,16 +1,16 @@
 import { ArrowDownOnSquareIcon, ArrowPathIcon, ClipboardDocumentListIcon, TrashIcon } from '@heroicons/react/24/outline'
 import { Tooltip } from 'react-tooltip'
-import { type UserImageData } from "../types/appTypes.ts";
+import {useAppContext} from "../contexts/AppContext.tsx";
 
-type ImageGalleryProps = {
-  userImages: UserImageData[];
-}
 
-export default function ImageGallery({ userImages } : ImageGalleryProps) {
+
+export default function ImageGallery() {
+  const { userImagesList } = useAppContext()
+
   return (
     <ul role="list" className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 sm:gap-x-6 lg:grid-cols-4 xl:gap-x-8">
-      {userImages.map((imageData) => (
-        <li key={imageData.id} className="relative">
+      {userImagesList.map((imageData, index) => (
+        <li key={imageData.id || index} className="relative">
           <div className="group aspect-h-7 aspect-w-10 block w-full overflow-hidden rounded-lg bg-gray-100 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 focus-within:ring-offset-gray-100 p-2">
               <img alt="" src={imageData.imageUrl} className="pointer-events-none object-cover group-hover:opacity-75" />
           </div>

@@ -13,10 +13,33 @@ const getApiBaseUrl = (): string => {
 };
 
 export default function PromptInput() {
-    const {prompt, setPrompt, n_images, quality, size, style, setUserImagesArray} = useAppContext();
+    const {prompt, setPrompt, n_images, quality, size, style, setUserImagesList, setGeneratingImages} = useAppContext();
+
+    //TODO: Vi ska nog inte hämta bilderna från egen blob storage direkt. Antingen så visar vi dem
+    // från de url:er som vi får från API:et eller så sparar vi dem i vår egen blob storage och hämtar alla bilder därifrån.
+    // Jag behöver fixa hanteringen av hur bilderna visas i ImageGallery.tsx.
+    const getSASToken = async (blobName: string) => {
+        const apiUrl = `${getApiBaseUrl()}/api/images/blob/${blobName}`;
+
+        try {
+            const response = await fetch(apiUrl, {
+                method: 'GET',
+            });
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            const data = await response.json();
+            return data['imageUrl'];
+        } catch (error) {
+            console.error('Error fetching SAS token data:', error);
+            return null;
+        }
+    };
 
     const handleGenerateClick = async () => {
-
+        const userId = '123'; // Hardcoded until we have user authentication
         const queryParams = new URLSearchParams({
             prompt,
             n_images: n_images.toString(),
@@ -25,22 +48,37 @@ export default function PromptInput() {
             style,
         });
 
-        const apiUrl = `${getApiBaseUrl()}/api/images/generate?${queryParams.toString()}`;
-        fetch(apiUrl, {
-            method: 'POST',
-        })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                setUserImagesArray(prevData => ({userImages: [...prevData.userImages, ...data]}));
-            })
-            .catch(error => {
-                console.error('Error fetching generated data:', error);
+        const apiUrl = `${getApiBaseUrl()}/api/images/generate?user_id=${userId}&${queryParams.toString()}`;
+        setGeneratingImages(true);
+
+        try {
+            const response = await fetch(apiUrl, {
+                method: 'POST',
             });
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            const data = await response.json();
+            console.log('Generated data:', data);
+
+            // Fetch SAS tokens for each image and update the imageUrl
+            const updatedData = await Promise.all(
+                data.map(async (d: any) => {
+                    const imageUrl = await getSASToken(d.blobName);
+                    return { ...d, imageUrl };
+                })
+            );
+
+            // Update the user images list with the new data
+            setUserImagesList((prevData) => [...prevData, ...updatedData]);
+        } catch (error) {
+            console.error('Error fetching generated data:', error);
+        } finally {
+            console.log("Done fetching generated data");
+            setGeneratingImages(false);
+        }
     };
 
 
