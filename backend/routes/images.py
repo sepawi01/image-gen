@@ -45,6 +45,7 @@ async def generate_images(user_id: str,
                           size: Literal['1024x1024', '1792x1024', '1024x1792'] = "1024x1024",
                           style: Literal["vivid", "natural"] = "natural"
                           ):
+
     try:
         # Generate images using OpenAI API
         result = OPENAI_CLIENT.images.generate(
@@ -87,6 +88,7 @@ async def generate_images(user_id: str,
 
         return JSONResponse(content=images_data)
     except BadRequestError as e:
+        print(f"Error: {e}")
         return JSONResponse(content={"error": str(e)}, status_code=400)
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)

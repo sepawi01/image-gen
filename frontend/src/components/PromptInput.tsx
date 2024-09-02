@@ -41,12 +41,12 @@ export default function PromptInput() {
         const userId = '123'; // Hardcoded until we have user authentication
         const queryParams = new URLSearchParams({
             prompt,
-            n_images: n_images.toString(),
+            n: n_images.toString(), // Has to be one for Dall-e-3
             quality,
             size,
             style,
         });
-
+        console.log(queryParams.toString())
         const apiUrl = `${getApiBaseUrl()}/api/images/generate?user_id=${userId}&${queryParams.toString()}`;
         setGeneratingImages(true);
 
@@ -68,7 +68,7 @@ export default function PromptInput() {
             //         return { ...d, imageUrl };
             //     })
             // );
-
+            console.log("Data: ", data);
             // Update the user images list with the new data
             setUserImagesList((prevData) => [...prevData, ...data]);
         } catch (error) {
