@@ -46,6 +46,7 @@ async def generate_images(user_id: str,
                           style: Literal["vivid", "natural"] = "natural"
                           ):
     try:
+        # Generate images using OpenAI API
         result = OPENAI_CLIENT.images.generate(
             model="PRS-Dall-e-3",
             prompt=prompt,
@@ -78,7 +79,8 @@ async def generate_images(user_id: str,
             images_data.append({
                 "prompt": prompt,
                 "revised_prompt": image_data["revised_prompt"],
-                "imageUrl": new_image_urls[i],
+                # "imageUrl": new_image_urls[i], # This is if we want to use the saved image and being able to access historical generated images
+                "imageUrl": image_data["url"], # We use this for now. The end user has to download the images if they want to keep them
                 "blobName": blob_names[i],
                 "imageSettings": image_settings
             })

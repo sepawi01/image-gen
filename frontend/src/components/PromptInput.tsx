@@ -15,10 +15,9 @@ const getApiBaseUrl = (): string => {
 export default function PromptInput() {
     const {prompt, setPrompt, n_images, quality, size, style, setUserImagesList, setGeneratingImages} = useAppContext();
 
-    //TODO: Vi ska nog inte hämta bilderna från egen blob storage direkt. Antingen så visar vi dem
-    // från de url:er som vi får från API:et eller så sparar vi dem i vår egen blob storage och hämtar alla bilder därifrån.
-    // Jag behöver fixa hanteringen av hur bilderna visas i ImageGallery.tsx.
+
     const getSASToken = async (blobName: string) => {
+        /** To be able to fetch the images from blobstorage we need to get a SAS-token for each image **/
         const apiUrl = `${getApiBaseUrl()}/api/images/blob/${blobName}`;
 
         try {
@@ -61,18 +60,17 @@ export default function PromptInput() {
             }
 
             const data = await response.json();
-            console.log('Generated data:', data);
 
-            // Fetch SAS tokens for each image and update the imageUrl
-            const updatedData = await Promise.all(
-                data.map(async (d: any) => {
-                    const imageUrl = await getSASToken(d.blobName);
-                    return { ...d, imageUrl };
-                })
-            );
+            // Fetch SAS tokens for each image and update the imageUrl. This should be done if we want to fetch saved images from the blobstorage
+            // const updatedData = await Promise.all(
+            //     data.map(async (d: any) => {
+            //         const imageUrl = await getSASToken(d.blobName);
+            //         return { ...d, imageUrl };
+            //     })
+            // );
 
             // Update the user images list with the new data
-            setUserImagesList((prevData) => [...prevData, ...updatedData]);
+            setUserImagesList((prevData) => [...prevData, ...data]);
         } catch (error) {
             console.error('Error fetching generated data:', error);
         } finally {
